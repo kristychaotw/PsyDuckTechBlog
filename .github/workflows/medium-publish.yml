@@ -1,0 +1,36 @@
+name: Medium Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install selenium markdown
+
+      - name: Download Chrome Driver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-chromedriver
+          sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+
+      - name: Run Selenium script to publish on Medium
+        env:
+          MEDIUM_USERNAME: ${{ secrets.MEDIUM_USERNAME }}
+          MEDIUM_PASSWORD: ${{ secrets.MEDIUM_PASSWORD }}
+        run: |
+          python scripts/publish_to_medium.py
