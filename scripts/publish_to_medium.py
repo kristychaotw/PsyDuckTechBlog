@@ -4,9 +4,6 @@ import markdown
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
 
 # 從 Markdown 檔案讀取內容
@@ -62,12 +59,23 @@ def publish_article(driver, title, content):
     publish_button.click()
     time.sleep(5)
 
+# 獲取指定資料夾中最新的 Markdown 檔案
+def get_latest_markdown_file(folder_path):
+    files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.md')]
+    if not files:
+        raise FileNotFoundError("資料夾中沒有找到 Markdown 檔案")
+    latest_file = max(files, key=os.path.getmtime)
+    return latest_file
+
 # 主函式
 def main():
-    # 設置用戶名、密碼和 Markdown 文件的路徑
+    # 設置用戶名、密碼和 Markdown 文件的資料夾路徑
     username = os.getenv('MEDIUM_USERNAME')  # 透過環境變數取得 Medium 用戶名
     password = os.getenv('MEDIUM_PASSWORD')  # 透過環境變數取得 Medium 密碼
-    md_file_path = 'src/content/your-article.md'  # 你的 Markdown 檔案路徑
+    folder_path = 'src/posts'  # Markdown 檔案資料夾路徑
+
+    # 找到最新的 Markdown 檔案
+    md_file_path = get_latest_markdown_file(folder_path)
     
     # 讀取 Markdown 內容
     md_content = read_markdown(md_file_path)
