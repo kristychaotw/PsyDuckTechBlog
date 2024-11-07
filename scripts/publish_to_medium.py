@@ -34,12 +34,14 @@ def login_medium(driver, username, password):
     # 增加超長等待時間，給予更多時間
     try:
         # 等待 Gmail 用戶名輸入框出現，增加等待時間
+        print("等待信箱輸入框加載...")
         WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, 'identifier')))
         # 輸入 Gmail 用戶名
         driver.find_element(By.NAME, 'identifier').send_keys(username)
         driver.find_element(By.ID, 'identifierNext').click()
 
         # 等待 Gmail 密碼頁面
+        print("等待密碼輸入框加載...")
         WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, 'password')))
         # 輸入密碼
         driver.find_element(By.NAME, 'password').send_keys(password)
@@ -47,8 +49,9 @@ def login_medium(driver, username, password):
 
         # 確認是否完成登入，等待跳轉
         WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[role="textbox"]')))
+        print("登入成功！")
     except TimeoutException as e:
-        print(f"Error: {e}")
+        print(f"TimeoutException: {e}")
         driver.quit()
         raise Exception("Failed to log in due to timeout.")
     time.sleep(5)  # 等待頁面完成載入
