@@ -22,13 +22,15 @@ jobs:
         run: |
           pip install selenium markdown
 
-      - name: Download Chrome Driver
+      - name: Install Chromium and ChromeDriver using apt
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-chromedriver
-          if [ ! -L "/usr/bin/chromedriver" ]; then
-            sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
-          fi
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+
+      - name: Verify Chrome and ChromeDriver installation
+        run: |
+          chromium-browser --version
+          chromedriver --version
 
       - name: Run Selenium script to publish on Medium
         env:
