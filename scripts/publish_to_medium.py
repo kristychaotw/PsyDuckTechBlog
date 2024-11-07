@@ -5,6 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # 從 Markdown 檔案讀取內容
 def read_markdown(file_path):
@@ -24,21 +26,27 @@ def create_chrome_driver():
     
     return driver
 
-# 登錄 Medium
+# 登錄 Medium（使用 Google 登入）
 def login_medium(driver, username, password):
-    driver.get('https://medium.com/m/signin')
+    driver.get('https://accounts.google.com/v3/signin/identifier?operation=login&state=google-%7Chttps%3A%2F%2Fmedium.com%2F%3Fsource%3Dlogin-------------------------------------%7Clogin&access_type=online&client_id=216296035834-k1k6qe060s2tp2a2jam4ljdcms00sttg.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fmedium.com%2Fm%2Fcallback%2Fgoogle&response_type=id_token%20token&scope=email%20openid%20profile&nonce=2b974c18ed8dcb1d7be8729ab2b89fee3c951fc87930890d5c769cfec48c9ae7&service=lso&o2v=1&ddm=1&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAM2EJOM7xYshoZ_OdwMk8YULAFHzS12rBtay4Jx-hLWpgCvesL9psCbganmnxsLDTYZjNO_de2S5KmIl7lgmxZBjuacQp0olI0VwlIZ-34mQA05zDdOOd2IEPo8o8SdJbnzUeLUzkjPpnT460Lk8_dPbLeJm_nXr6AQh1Pc2Oyov1Ia5FDytY1QXFsYPY0lw-ziLfzm_4Ggg-ZW5GIPheE5XSOVyPX5f96Sn1ntm5C2Tr4FP08qC47Bg23A0Y546gLhNs91xrrJf-WeiSMW4tZNJOensAKQb5cMutyGIn_vXQji9ucpjpLN6Xr4drrLyIGZ17AFjZ6gRys6C2AzGmbpdTAK9PnNJpiCchoMBkxpmzk0H-vQcmOC329NTiCZUqi8ktNnIDX7TAS4PG3hdEMzgd85T--XDcP0gPpLs4lsJCcHe-UrZrLSlQgxMaeFCHOF0UaBkkFwqYVfdeJGxHKgEHPwMw%26flowName%3DGeneralOAuthFlow%26as%3DS-986635725%253A1730967845042370%26client_id%3D216296035834-k1k6qe060s2tp2a2jam4ljdcms00sttg.apps.googleusercontent.com%23')
+
+    # 等待郵箱輸入框出現
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'identifier')))
     
-    # 等待頁面載入
-    time.sleep(3)
+    # 輸入 Gmail 用戶名
+    driver.find_element(By.NAME, 'identifier').send_keys(username)
+    driver.find_element(By.ID, 'identifierNext').click()
     
-    # 填寫 Medium 用戶名和密碼
-    driver.find_element(By.NAME, 'email').send_keys(username)
+    # 等待密碼頁面出現
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'password')))
+    
+    # 輸入 Gmail 密碼
     driver.find_element(By.NAME, 'password').send_keys(password)
+    driver.find_element(By.ID, 'passwordNext').click()
     
-    driver.find_element(By.CSS_SELECTOR, 'button[data-action="sign-in"]').click()
-    
-    # 等待登入完成
-    time.sleep(5)
+    # 等待頁面跳轉回 Medium
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[role="textbox"]')))
+    time.sleep(3)  # 等待頁面完成載入
 
 # 發佈文章到 Medium
 def publish_article(driver, title, content):
